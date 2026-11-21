@@ -2,11 +2,14 @@ import 'package:flutter/widgets.dart';
 
 class InstituteStore extends ChangeNotifier {
   String? _phone;
+  String? _selectedExam;
   final Set<String> _enrolled = {};
   final Map<String, double> _progress = {};
 
   String? get phone => _phone;
+  String? get selectedExam => _selectedExam;
   bool get isSignedIn => _phone != null;
+  bool get hasSelectedExam => _selectedExam != null;
 
   bool isEnrolled(String courseId) => _enrolled.contains(courseId);
 
@@ -16,6 +19,7 @@ class InstituteStore extends ChangeNotifier {
 
   void signIn(String phone) {
     _phone = phone;
+    _selectedExam = null;
     _enrolled
       ..clear()
       ..addAll({'upsc-foundation', 'mppsc-prelims'});
@@ -28,8 +32,15 @@ class InstituteStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void selectExam(String exam) {
+    if (_selectedExam == exam) return;
+    _selectedExam = exam;
+    notifyListeners();
+  }
+
   void signOut() {
     _phone = null;
+    _selectedExam = null;
     _enrolled.clear();
     _progress.clear();
     notifyListeners();
