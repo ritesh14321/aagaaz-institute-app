@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "720716690626",
+    "project_id": "aagaaz-institute-aab3c",
+    "storage_bucket": "aagaaz-institute-aab3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720716690626:android:e20a277693e88213b4b75b",
+        "android_client_info": {
+          "package_name": "com.aagaazinstitute.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALlTkoO_DijodXPO2bAX18NBPouqOCZDA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
