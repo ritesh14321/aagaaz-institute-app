@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'screens/exam_select_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/shell_screen.dart';
 import 'state/institute_store.dart';
@@ -50,6 +51,8 @@ class _Gate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = InstituteScope.of(context);
-    return store.isSignedIn ? const InstituteShell() : const LoginScreen();
+    if (!store.isSignedIn) return const LoginScreen();
+    if (!store.hasSelectedExam) return const ExamSelectScreen();
+    return const InstituteShell();
   }
 }
