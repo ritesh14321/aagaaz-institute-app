@@ -39,45 +39,97 @@ class HomeScreen extends StatelessWidget {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             sliver: SliverToBoxAdapter(
-              child: Row(
-                children: [
-                  const AagaazMark(size: 46),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppColors.line),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        const Text(
-                          'AAGAAZ INSTITUTE',
-                          style: TextStyle(
-                            color: AppColors.clay,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1.1,
+                        const AagaazMark(size: 48),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'AAGAAZ INSTITUTE',
+                                style: TextStyle(
+                                  color: AppColors.clay,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _greeting(),
+                                style: const TextStyle(
+                                  color: AppColors.ink,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              if (phone != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  maskIndianMobile(phone),
+                                  style: const TextStyle(
+                                    color: AppColors.muted,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        Text(
-                          _greeting(),
-                          style: const TextStyle(
-                            color: AppColors.ink,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        if (phone != null)
-                          Text(
-                            maskIndianMobile(phone),
-                            style: const TextStyle(color: AppColors.muted),
-                          ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.cream,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.school_outlined,
+                            size: 16,
+                            color: AppColors.ink,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'UPSC & MPPSC  ·  Indore & Mandsaur',
+                              style: TextStyle(
+                                color: AppColors.ink,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 22, 8, 0),
+            padding: const EdgeInsets.fromLTRB(20, 20, 8, 0),
             sliver: SliverToBoxAdapter(
               child: SectionHeader(
                 title: 'Live classes',
@@ -105,7 +157,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 8, 0),
+            padding: const EdgeInsets.fromLTRB(20, 14, 8, 0),
             sliver: SliverToBoxAdapter(
               child: SectionHeader(
                 title: 'Courses',
