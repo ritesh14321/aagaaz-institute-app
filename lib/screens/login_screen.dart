@@ -49,10 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
       body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFF1C3A5F),
+              Color(0xFF1E3F66),
               AppColors.ink,
               AppColors.inkDeep,
             ],
@@ -61,22 +61,46 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Stack(
           children: [
             const Positioned(
-              top: -90,
-              right: -50,
+              top: -85,
+              right: -55,
               child: _SunGlow(),
             ),
             SafeArea(
               child: Column(
                 children: [
-                  const SizedBox(height: 28),
-                  const AagaazMark(onDark: true),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: const Text(
+                      'CIVIL SERVICES PORTAL',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
+                  const AagaazMark(onDark: true),
+                  const SizedBox(height: 14),
                   const Text(
                     'Aagaaz Institute',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -85,20 +109,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       color: Color(0xFFD5DEEA),
                       fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 24),
                   Expanded(
                     child: Container(
                       width: double.infinity,
                       decoration: const BoxDecoration(
                         color: AppColors.cream,
                         borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(28),
+                          top: Radius.circular(32),
                         ),
                       ),
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                        padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
                         child: _otpStep ? _otpForm() : _phoneForm(),
                       ),
                     ),
@@ -120,18 +145,22 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Sign in with your mobile number',
+          'Welcome back',
           style: TextStyle(
             color: AppColors.ink,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w700,
-            height: 1.25,
+            letterSpacing: -0.3,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         const Text(
-          'Use the Indian mobile number linked to your Aagaaz account.',
-          style: TextStyle(color: AppColors.muted, height: 1.4),
+          'Sign in with your registered mobile number to access batches, tests, and study material.',
+          style: TextStyle(
+            color: AppColors.muted,
+            fontSize: 14,
+            height: 1.45,
+          ),
         ),
         const SizedBox(height: 24),
         const Text(
@@ -139,6 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(
             color: AppColors.ink,
             fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 8),
@@ -187,20 +217,51 @@ class _LoginScreenState extends State<LoginScreen> {
         if (invalidComplete) ...[
           const SizedBox(height: 8),
           const Text(
-            'Enter a 10-digit mobile number starting with 6, 7, 8, or 9.',
+            'Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.',
             style: TextStyle(color: AppColors.clay, fontSize: 13),
           ),
         ],
-        const SizedBox(height: 20),
-        FilledButton(
-          key: const Key('continue-button'),
-          onPressed: isIndianMobile(digits) ? _continue : null,
-          child: const Text('Continue'),
+        const SizedBox(height: 22),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: FilledButton(
+            key: const Key('continue-button'),
+            onPressed: isIndianMobile(digits) ? _continue : null,
+            child: const Text(
+              'Continue',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
         ),
-        const SizedBox(height: 16),
-        const Text(
-          'This demo accepts the number on your phone and continues with a one-time code. No SMS is sent.',
-          style: TextStyle(color: AppColors.muted, fontSize: 13, height: 1.4),
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.75),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.line),
+          ),
+          child: const Row(
+            children: [
+              Icon(
+                Icons.verified_user_outlined,
+                size: 18,
+                color: AppColors.ink,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Enter any 6-digit verification code on the next step to continue.',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontSize: 12.5,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -213,19 +274,33 @@ class _LoginScreenState extends State<LoginScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Enter the 6-digit code',
+          'Verify your number',
           style: TextStyle(
             color: AppColors.ink,
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Enter the 6-digit code for +91 ${formatIndianMobile(_digits)}.',
+          style: const TextStyle(
+            color: AppColors.muted,
+            fontSize: 14,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: 24),
+        const Text(
+          'Verification code',
+          style: TextStyle(
+            color: AppColors.ink,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          'For +91 ${formatIndianMobile(_digits)}. Any 6-digit code signs you in for this demo.',
-          style: const TextStyle(color: AppColors.muted, height: 1.4),
-        ),
-        const SizedBox(height: 24),
         TextField(
           key: const Key('otp-field'),
           controller: _otpController,
@@ -239,7 +314,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onChanged: (_) => setState(() {}),
           onSubmitted: (_) => _verify(),
           style: const TextStyle(
-            letterSpacing: 8,
+            letterSpacing: 10,
             fontSize: 22,
             fontWeight: FontWeight.w700,
           ),
@@ -248,20 +323,29 @@ class _LoginScreenState extends State<LoginScreen> {
             counterText: '',
           ),
         ),
-        const SizedBox(height: 20),
-        FilledButton(
-          key: const Key('verify-button'),
-          onPressed: code.length == 6 ? _verify : null,
-          child: const Text('Verify and continue'),
+        const SizedBox(height: 22),
+        SizedBox(
+          width: double.infinity,
+          height: 52,
+          child: FilledButton(
+            key: const Key('verify-button'),
+            onPressed: code.length == 6 ? _verify : null,
+            child: const Text(
+              'Verify and sign in',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+            ),
+          ),
         ),
-        const SizedBox(height: 8),
-        TextButton(
-          key: const Key('change-number'),
-          onPressed: () => setState(() {
-            _otpStep = false;
-            _otpController.clear();
-          }),
-          child: const Text('Use a different number'),
+        const SizedBox(height: 10),
+        Center(
+          child: TextButton(
+            key: const Key('change-number'),
+            onPressed: () => setState(() {
+              _otpStep = false;
+              _otpController.clear();
+            }),
+            child: const Text('Change mobile number'),
+          ),
         ),
       ],
     );
