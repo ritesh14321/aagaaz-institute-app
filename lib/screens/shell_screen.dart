@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'account_screen.dart';
 import 'courses_screen.dart';
+import 'ebook_screen.dart';
 import 'home_screen.dart';
 import 'live_screen.dart';
+import 'quiz_screen.dart';
 
 class InstituteShell extends StatefulWidget {
   const InstituteShell({super.key});
@@ -29,7 +30,8 @@ class _InstituteShellState extends State<InstituteShell> {
           ),
           const CoursesScreen(),
           const LiveScreen(),
-          const AccountScreen(),
+          const QuizScreen(),
+          const EbookScreen(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -52,9 +54,14 @@ class _InstituteShellState extends State<InstituteShell> {
             label: 'Live',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Account',
+            icon: Icon(Icons.quiz_outlined),
+            selectedIcon: Icon(Icons.quiz),
+            label: 'Quiz',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.auto_stories_outlined),
+            selectedIcon: Icon(Icons.auto_stories),
+            label: 'E-Book',
           ),
         ],
       ),
