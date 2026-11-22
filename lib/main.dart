@@ -35,11 +35,25 @@ class _AagaazAppState extends State<AagaazApp> {
   Widget build(BuildContext context) {
     return InstituteScope(
       store: _store,
-      child: MaterialApp(
-        title: 'Aagaaz Institute',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        home: const _Gate(),
+      child: Builder(
+        builder: (context) {
+          final store = InstituteScope.of(context);
+          return MaterialApp(
+            title: 'Aagaaz Institute',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(),
+            darkTheme: ThemeData(
+              useMaterial3: true,
+              brightness: Brightness.dark,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color(0xFFB4532A),
+                brightness: Brightness.dark,
+              ),
+            ),
+            themeMode: store.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: const _Gate(),
+          );
+        },
       ),
     );
   }
