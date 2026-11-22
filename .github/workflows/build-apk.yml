@@ -70,8 +70,9 @@ jobs:
           }
           EOF
 
+          SDK_PATH="${FLUTTER_ROOT:-$(dirname $(dirname $(which flutter)))}"
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug -Pflutter.sdk="$SDK_PATH" --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
