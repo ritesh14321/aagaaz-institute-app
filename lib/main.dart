@@ -13,12 +13,20 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  await SupabaseService.initialize();
-  runApp(const AagaazApp());
+
+  String? initError;
+  try {
+    await SupabaseService.initialize();
+  } catch (e) {
+    initError = e.toString();
+  }
+
+  runApp(AagaazApp(initError: initError));
 }
 
 class AagaazApp extends StatefulWidget {
-  const AagaazApp({super.key});
+  final String? initError;
+  const AagaazApp({super.key, this.initError});
 
   @override
   State<AagaazApp> createState() => _AagaazAppState();
@@ -53,7 +61,19 @@ class _AagaazAppState extends State<AagaazApp> {
               ),
             ),
             themeMode: store.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const _Gate(),
+            home: widget.initError != null
+                ? Scaffold(
+                    body: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'Startup Error:\n${widget.initError}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                  )
+                : const _Gate(),
           );
         },
       ),
