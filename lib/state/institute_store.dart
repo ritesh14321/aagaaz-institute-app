@@ -6,11 +6,14 @@ class InstituteStore extends ChangeNotifier {
   bool _isDarkMode = false;
   final Set<String> _enrolled = {};
   final Map<String, double> _progress = {};
-
+bool _isSyncingContent = false;
+  DateTime? _lastSyncedAt;
   String? get phone => _phone;
   String? get selectedExam => _selectedExam;
   bool get isDarkMode => _isDarkMode;
   bool get isSignedIn => _phone != null;
+  bool get isSyncingContent => _isSyncingContent;
+  DateTime? get lastSyncedAt => _lastSyncedAt;
   bool get hasSelectedExam => _selectedExam != null;
 
   bool isEnrolled(String courseId) => _enrolled.contains(courseId);
@@ -61,6 +64,16 @@ class InstituteStore extends ChangeNotifier {
       _progress[courseId] = 0;
       notifyListeners();
     }
+  }
+  Future<void> markContentSynced() async {
+    if (_isSyncingContent) return;
+    _isSyncingContent = true;
+    notifyListeners();
+
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    _lastSyncedAt = DateTime.now();
+    _isSyncingContent = false;
+    notifyListeners();
   }
 }
 
