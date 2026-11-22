@@ -5,6 +5,7 @@ import 'screens/exam_select_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/shell_screen.dart';
 import 'state/institute_store.dart';
+import 'supabase_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -12,6 +13,7 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+  await SupabaseService.initialize();
   runApp(const AagaazApp());
 }
 
