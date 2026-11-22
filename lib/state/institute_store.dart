@@ -3,11 +3,13 @@ import 'package:flutter/widgets.dart';
 class InstituteStore extends ChangeNotifier {
   String? _phone;
   String? _selectedExam;
+  bool _isDarkMode = false;
   final Set<String> _enrolled = {};
   final Map<String, double> _progress = {};
 
   String? get phone => _phone;
   String? get selectedExam => _selectedExam;
+  bool get isDarkMode => _isDarkMode;
   bool get isSignedIn => _phone != null;
   bool get hasSelectedExam => _selectedExam != null;
 
@@ -38,9 +40,17 @@ class InstituteStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void toggleDarkMode([bool? value]) {
+    final next = value ?? !_isDarkMode;
+    if (_isDarkMode == next) return;
+    _isDarkMode = next;
+    notifyListeners();
+  }
+
   void signOut() {
     _phone = null;
     _selectedExam = null;
+    _isDarkMode = false;
     _enrolled.clear();
     _progress.clear();
     notifyListeners();
