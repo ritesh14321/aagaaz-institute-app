@@ -31,7 +31,54 @@ jobs:
       - name: Build debug APK
         run: |
           flutter build apk --debug || true
-          sed -i 's/minSdkVersion.*/minSdk = 21/g' android/app/build.gradle.kts
+
+          sed -i '/android\.builtInKotlin/d; /android\.newDsl/d' android/gradle.properties 2>/dev/null || true
+
+          cat << 'EOF' > android/app/build.gradle.kts
+          import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+          plugins {
+              id("com.android.application")
+              id("kotlin-android")
+              id("dev.flutter.flutter-gradle-plugin")
+          }
+
+          android {
+              namespace = "com.aagaazinstitute.aagaaz_institute"
+              compileSdk = flutter.compileSdkVersion
+              ndkVersion = flutter.ndkVersion
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+
+              defaultConfig {
+                  applicationId = "com.aagaazinstitute.aagaaz_institute"
+                  minSdk = 21
+                  targetSdk = flutter.targetSdkVersion
+                  versionCode = flutter.versionCode
+                  versionName = flutter.versionName
+              }
+
+              buildTypes {
+                  release {
+                      signingConfig = signingConfigs.getByName("debug")
+                  }
+              }
+          }
+
+          kotlin {
+              compilerOptions {
+                  jvmTarget.set(JvmTarget.JVM_17)
+              }
+          }
+
+          flutter {
+              source = "../.."
+          }
+          EOF
+
           cd android
           ./gradlew assembleDebug --no-daemon
 
