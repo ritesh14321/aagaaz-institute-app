@@ -35,11 +35,8 @@ jobs:
           sed -i '/android\.builtInKotlin/d; /android\.newDsl/d' android/gradle.properties 2>/dev/null || true
 
           cat << 'EOF' > android/app/build.gradle.kts
-          import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
           plugins {
               id("com.android.application")
-              id("kotlin-android")
               id("dev.flutter.flutter-gradle-plugin")
           }
 
@@ -65,12 +62,6 @@ jobs:
                   release {
                       signingConfig = signingConfigs.getByName("debug")
                   }
-              }
-          }
-
-          kotlin {
-              compilerOptions {
-                  jvmTarget.set(JvmTarget.JVM_17)
               }
           }
 
