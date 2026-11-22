@@ -28,13 +28,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build debug APK (fix after Flutter auto-upgrade if needed)
+      - name: Build debug APK
         run: |
           if ! flutter build apk --debug; then
             echo "Fixing minSdk after Flutter upgrade..."
             sed -i 's/minSdkVersion.*/minSdk = 21/g' android/app/build.gradle.kts
             grep -n "minSdk" android/app/build.gradle.kts
-            flutter build apk --debug
+            chmod 444 android/app/build.gradle.kts
+            flutter build apk --debug --no-pub || (cd android && ./gradlew assembleDebug)
           fi
 
       - name: Upload APK artifact
