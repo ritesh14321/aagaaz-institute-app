@@ -42,6 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
             'Live classes, structured notes & daily practice  ·  Tap to explore',
         icon: Icons.campaign_outlined,
         accentColor: AppColors.clay,
+        // Jab chaahein yahan apni image ka URL ya asset path daal sakte hain:
+        // imageUrl: 'https://example.com/batch-banner.jpg',
+        // assetPath: 'assets/banners/foundation_batch.png',
       ),
       _PromoBanner(
         badge: 'LIVE MENTORSHIP',
@@ -61,35 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
-  List<_TestSeriesItem> _testSeriesForExam(String exam) {
-    return [
-      _TestSeriesItem(
-        title: '$exam Prelims Full Mock Test Series',
-        meta: '15 Full Tests  ·  GS & CSAT',
-        badge: 'Prelims',
-        icon: Icons.assignment_turned_in_outlined,
-      ),
-      _TestSeriesItem(
-        title: 'Mains Answer Writing & Sectional Tests',
-        meta: '12 Topic Tests  ·  Model Hints',
-        badge: 'Mains',
-        icon: Icons.edit_note_outlined,
-      ),
-      _TestSeriesItem(
-        title: 'Current Affairs & Weekly Revision Tests',
-        meta: 'Weekly Set  ·  Instant Analysis',
-        badge: 'Weekly',
-        icon: Icons.fact_check_outlined,
-      ),
-    ];
-  }
-
   @override
   void initState() {
     super.initState();
+    final totalBanners = _bannersForExam('UPSC').length;
     _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!mounted || !_bannerController.hasClients) return;
-      final nextPage = (_bannerIndex + 1) % 3;
+      final nextPage = (_bannerIndex + 1) % totalBanners;
       _bannerController.animateToPage(
         nextPage,
         duration: const Duration(milliseconds: 420),
@@ -110,7 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final store = InstituteScope.of(context);
     final exam = store.selectedExam ?? 'UPSC & MPPSC';
     final banners = _bannersForExam(exam);
-    final testSeries = _testSeriesForExam(exam);
     final classes = Catalog.liveClasses();
     final courses = [...Catalog.courses]..sort((a, b) {
         final aRank = store.isEnrolled(a.id) ? 0 : 1;
@@ -207,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           sliver: SliverList.separated(
             itemCount: courses.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -224,36 +204,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               );
             },
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 8, 0),
-          sliver: SliverToBoxAdapter(
-            child: SectionHeader(
-              title: 'Test series',
-              actionLabel: 'Practice',
-              onAction: widget.onBrowseTests ?? widget.onBrowseCourses,
-            ),
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          sliver: SliverToBoxAdapter(
-            child: SizedBox(
-              height: 146,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: testSeries.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
-                itemBuilder: (context, index) {
-                  final item = testSeries[index];
-                  return _TestSeriesCard(
-                    item: item,
-                    onTap: widget.onBrowseTests ?? widget.onBrowseCourses,
-                  );
-                },
-              ),
-            ),
           ),
         ),
       ],
@@ -276,6 +226,8 @@ class _PromoBanner {
     required this.subtitle,
     required this.icon,
     required this.accentColor,
+    this.imageUrl,
+    this.assetPath,
   });
 
   final String badge;
@@ -283,6 +235,8 @@ class _PromoBanner {
   final String subtitle;
   final IconData icon;
   final Color accentColor;
+  final String? imageUrl;
+  final String? assetPath;
 }
 
 class _BannerCard extends StatelessWidget {
@@ -294,8 +248,47 @@ class _BannerCard extends StatelessWidget {
   final _PromoBanner banner;
   final VoidCallback onTap;
 
+  Widget _buildVisual() {
+    final fallbackIcon = Icon(
+      banner.icon,
+      color: banner.accentColor,
+      size: 28,
+    );
+
+    if (banner.assetPath != null && banner.assetPath!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.asset(
+          banner.assetPath!,
+          width: 84,
+          height: 84,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => fallbackIcon,
+        ),
+      );
+    }
+
+    if (banner.imageUrl != null && banner.imageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          banner.imageUrl!,
+          width: 84,
+          height: 84,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => fallbackIcon,
+        ),
+      );
+    }
+
+    return fallbackIcon;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasImage = (banner.assetPath != null && banner.assetPath!.isNotEmpty) ||
+        (banner.imageUrl != null && banner.imageUrl!.isNotEmpty);
+
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(20),
@@ -362,134 +355,17 @@ class _BannerCard extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Container(
-                width: 54,
-                height: 54,
+                width: hasImage ? 84 : 54,
+                height: hasImage ? 84 : 54,
                 decoration: BoxDecoration(
                   color: AppColors.cream,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.line),
                 ),
-                child: Icon(
-                  banner.icon,
-                  color: banner.accentColor,
-                  size: 28,
-                ),
+                alignment: Alignment.center,
+                child: _buildVisual(),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TestSeriesItem {
-  const _TestSeriesItem({
-    required this.title,
-    required this.meta,
-    required this.badge,
-    required this.icon,
-  });
-
-  final String title;
-  final String meta;
-  final String badge;
-  final IconData icon;
-}
-
-class _TestSeriesCard extends StatelessWidget {
-  const _TestSeriesCard({
-    required this.item,
-    required this.onTap,
-  });
-
-  final _TestSeriesItem item;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 248,
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.line),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: AppColors.cream,
-                        borderRadius: BorderRadius.circular(11),
-                      ),
-                      child: Icon(
-                        item.icon,
-                        size: 20,
-                        color: AppColors.ink,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.cream,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        item.badge,
-                        style: const TextStyle(
-                          color: AppColors.clay,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.ink,
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
-                        height: 1.25,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.meta,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.muted,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
           ),
         ),
       ),
