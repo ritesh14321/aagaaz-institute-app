@@ -1,17 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../data/catalog.dart';
 import '../models/live_class.dart';
 import '../state/institute_store.dart';
 import '../theme/app_colors.dart';
-import '../utils/phone.dart';
 import '../widgets/course_card.dart';
 import '../widgets/live_class_card.dart';
 import '../widgets/section_header.dart';
 import 'classroom_screen.dart';
 import 'course_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.onBrowseCourses,
@@ -22,95 +23,130 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback onBrowseLive;
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final PageController _bannerController = PageController();
+  Timer? _autoSlideTimer;
+  int _bannerIndex = 0;
+
+  List<_PromoBanner> _bannersForExam(String exam) {
+    return [
+      _PromoBanner(
+        badge: 'NEW BATCH LAUNCH',
+        title: '$exam Foundation Batch 2026',
+        subtitle: 'Live classes, structured notes & daily practice  ·  Tap to explore',
+        icon: Icons.campaign_outlined,
+        accentColor: AppColors.clay,
+      ),
+      _PromoBanner(
+        badge: 'LIVE MENTORSHIP',
+        title: 'Prelims & Mains Test Series',
+        subtitle: 'Regular evaluation & answer writing guidance in Indore & Mandsaur',
+        icon: Icons.verified_outlined,
+        accentColor: AppColors.ink,
+      ),
+      _PromoBanner(
+        badge: 'DAILY PRACTICE',
+        title: 'Daily Quiz & Current Affairs',
+        subtitle: 'Sharpen accuracy every day with topic-wise question sets',
+        icon: Icons.auto_awesome_outlined,
+        accentColor: AppColors.clay,
+      ),
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _autoSlideTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (!mounted || !_bannerController.hasClients) return;
+      final nextPage = (_bannerIndex + 1) % 3;
+      _bannerController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoSlideTimer?.cancel();
+    _bannerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final store = InstituteScope.of(context);
     final exam = store.selectedExam ?? 'UPSC & MPPSC';
+    final banners = _bannersForExam(exam);
     final classes = Catalog.liveClasses();
     final courses = [...Catalog.courses]..sort((a, b) {
         final aRank = store.isEnrolled(a.id) ? 0 : 1;
         final bRank = store.isEnrolled(b.id) ? 0 : 1;
         return aRank.compareTo(bRank);
       });
-    final phone = store.phone;
 
     return CustomScrollView(
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           sliver: SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.line),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _greeting(),
-                    style: const TextStyle(
-                      color: AppColors.ink,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.2,
-                    ),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 154,
+                  child: PageView.builder(
+                    controller: _bannerController,
+                    itemCount: banners.length,
+                    onPageChanged: (index) {
+                      setState(() => _bannerIndex = index);
+                    },
+                    itemBuilder: (context, index) {
+                      final banner = banners[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          right: index == banners.length - 1 ? 0 : 6,
+                        ),
+                        child: _BannerCard(
+                          banner: banner,
+                          onTap: widget.onBrowseCourses,
+                        ),
+                      );
+                    },
                   ),
-                  if (phone != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      maskIndianMobile(phone),
-                      style: const TextStyle(
-                        color: AppColors.muted,
-                        fontSize: 13,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(banners.length, (index) {
+                    final active = index == _bannerIndex;
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      width: active ? 18 : 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: active ? AppColors.clay : AppColors.line,
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.cream,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.school_outlined,
-                          size: 16,
-                          color: AppColors.ink,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            '$exam Track  ·  Indore & Mandsaur',
-                            style: const TextStyle(
-                              color: AppColors.ink,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                    );
+                  }),
+                ),
+              ],
             ),
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 8, 0),
+          padding: const EdgeInsets.fromLTRB(20, 14, 8, 0),
           sliver: SliverToBoxAdapter(
             child: SectionHeader(
               title: 'Live classes',
               actionLabel: 'Schedule',
-              onAction: onBrowseLive,
+              onAction: widget.onBrowseLive,
             ),
           ),
         ),
@@ -138,7 +174,7 @@ class HomeScreen extends StatelessWidget {
             child: SectionHeader(
               title: 'Courses',
               actionLabel: 'See all',
-              onAction: onBrowseCourses,
+              onAction: widget.onBrowseCourses,
             ),
           ),
         ),
@@ -175,9 +211,116 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-String _greeting() {
-  final hour = DateTime.now().hour;
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+class _PromoBanner {
+  const _PromoBanner({
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+  });
+
+  final String badge;
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+}
+
+class _BannerCard extends StatelessWidget {
+  const _BannerCard({
+    required this.banner,
+    required this.onTap,
+  });
+
+  final _PromoBanner banner;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.line),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.cream,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        banner.badge,
+                        style: TextStyle(
+                          color: banner.accentColor,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.6,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      banner.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      banner.subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 12.5,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: AppColors.cream,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.line),
+                ),
+                child: Icon(
+                  banner.icon,
+                  color: banner.accentColor,
+                  size: 28,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
