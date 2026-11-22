@@ -71,6 +71,11 @@ jobs:
           }
           EOF
 
+      - name: Fix minSdk in build.gradle.kts
+        run: |
+          sed -i 's/minSdkVersion.*/minSdk = 21/g' android/app/build.gradle.kts
+          grep -n "minSdk" android/app/build.gradle.kts
+
       - name: Build debug APK
         run: flutter build apk --debug
 
