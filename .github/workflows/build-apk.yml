@@ -26,9 +26,7 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        run: |
-          rm -f pubspec.lock
-          flutter pub upgrade --verbose
+        run: flutter pub get
 
       - name: Build debug APK
         run: flutter build apk --debug
