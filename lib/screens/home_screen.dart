@@ -17,10 +17,12 @@ class HomeScreen extends StatefulWidget {
     super.key,
     required this.onBrowseCourses,
     required this.onBrowseLive,
+    this.onBrowseTests,
   });
 
   final VoidCallback onBrowseCourses;
   final VoidCallback onBrowseLive;
+  final VoidCallback? onBrowseTests;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -36,14 +38,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _PromoBanner(
         badge: 'NEW BATCH LAUNCH',
         title: '$exam Foundation Batch 2026',
-        subtitle: 'Live classes, structured notes & daily practice  ·  Tap to explore',
+        subtitle:
+            'Live classes, structured notes & daily practice  ·  Tap to explore',
         icon: Icons.campaign_outlined,
         accentColor: AppColors.clay,
       ),
       _PromoBanner(
         badge: 'LIVE MENTORSHIP',
         title: 'Prelims & Mains Test Series',
-        subtitle: 'Regular evaluation & answer writing guidance in Indore & Mandsaur',
+        subtitle:
+            'Regular evaluation & answer writing guidance in Indore & Mandsaur',
         icon: Icons.verified_outlined,
         accentColor: AppColors.ink,
       ),
@@ -53,6 +57,29 @@ class _HomeScreenState extends State<HomeScreen> {
         subtitle: 'Sharpen accuracy every day with topic-wise question sets',
         icon: Icons.auto_awesome_outlined,
         accentColor: AppColors.clay,
+      ),
+    ];
+  }
+
+  List<_TestSeriesItem> _testSeriesForExam(String exam) {
+    return [
+      _TestSeriesItem(
+        title: '$exam Prelims Full Mock Test Series',
+        meta: '15 Full Tests  ·  GS & CSAT',
+        badge: 'Prelims',
+        icon: Icons.assignment_turned_in_outlined,
+      ),
+      _TestSeriesItem(
+        title: 'Mains Answer Writing & Sectional Tests',
+        meta: '12 Topic Tests  ·  Model Hints',
+        badge: 'Mains',
+        icon: Icons.edit_note_outlined,
+      ),
+      _TestSeriesItem(
+        title: 'Current Affairs & Weekly Revision Tests',
+        meta: 'Weekly Set  ·  Instant Analysis',
+        badge: 'Weekly',
+        icon: Icons.fact_check_outlined,
       ),
     ];
   }
@@ -83,6 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final store = InstituteScope.of(context);
     final exam = store.selectedExam ?? 'UPSC & MPPSC';
     final banners = _bannersForExam(exam);
+    final testSeries = _testSeriesForExam(exam);
     final classes = Catalog.liveClasses();
     final courses = [...Catalog.courses]..sort((a, b) {
         final aRank = store.isEnrolled(a.id) ? 0 : 1;
@@ -179,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
           sliver: SliverList.separated(
             itemCount: courses.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -196,6 +224,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               );
             },
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 18, 8, 0),
+          sliver: SliverToBoxAdapter(
+            child: SectionHeader(
+              title: 'Test series',
+              actionLabel: 'Practice',
+              onAction: widget.onBrowseTests ?? widget.onBrowseCourses,
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          sliver: SliverToBoxAdapter(
+            child: SizedBox(
+              height: 146,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: testSeries.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final item = testSeries[index];
+                  return _TestSeriesCard(
+                    item: item,
+                    onTap: widget.onBrowseTests ?? widget.onBrowseCourses,
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ],
@@ -318,6 +376,120 @@ class _BannerCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TestSeriesItem {
+  const _TestSeriesItem({
+    required this.title,
+    required this.meta,
+    required this.badge,
+    required this.icon,
+  });
+
+  final String title;
+  final String meta;
+  final String badge;
+  final IconData icon;
+}
+
+class _TestSeriesCard extends StatelessWidget {
+  const _TestSeriesCard({
+    required this.item,
+    required this.onTap,
+  });
+
+  final _TestSeriesItem item;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 248,
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.line),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: AppColors.cream,
+                        borderRadius: BorderRadius.circular(11),
+                      ),
+                      child: Icon(
+                        item.icon,
+                        size: 20,
+                        color: AppColors.ink,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.cream,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        item.badge,
+                        style: const TextStyle(
+                          color: AppColors.clay,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.meta,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
