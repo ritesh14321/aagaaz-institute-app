@@ -77,6 +77,7 @@ jobs:
           EOF
 
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK artifact
