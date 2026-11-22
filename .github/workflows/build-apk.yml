@@ -28,56 +28,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Ensure valid build.gradle.kts
+      - name: Build debug APK (fix after Flutter auto-upgrade if needed)
         run: |
-          cat << 'EOF' > android/app/build.gradle.kts
-          plugins {
-              id("com.android.application")
-              id("kotlin-android")
-              id("dev.flutter.flutter-gradle-plugin")
-          }
-
-          android {
-              namespace = "com.aagaazinstitute.aagaaz_institute"
-              compileSdk = flutter.compileSdkVersion
-              ndkVersion = flutter.ndkVersion
-
-              compileOptions {
-                  sourceCompatibility = JavaVersion.VERSION_17
-                  targetCompatibility = JavaVersion.VERSION_17
-              }
-
-              kotlinOptions {
-                  jvmTarget = "17"
-              }
-
-              defaultConfig {
-                  applicationId = "com.aagaazinstitute.aagaaz_institute"
-                  minSdk = 21
-                  targetSdk = flutter.targetSdkVersion
-                  versionCode = flutter.versionCode
-                  versionName = flutter.versionName
-              }
-
-              buildTypes {
-                  release {
-                      signingConfig = signingConfigs.getByName("debug")
-                  }
-              }
-          }
-
-          flutter {
-              source = "../.."
-          }
-          EOF
-
-      - name: Fix minSdk in build.gradle.kts
-        run: |
-          sed -i 's/minSdkVersion.*/minSdk = 21/g' android/app/build.gradle.kts
-          grep -n "minSdk" android/app/build.gradle.kts
-
-      - name: Build debug APK
-        run: flutter build apk --debug
+          if ! flutter build apk --debug; then
+            echo "Fixing minSdk after Flutter upgrade..."
+            sed -i 's/minSdkVersion.*/minSdk = 21/g' android/app/build.gradle.kts
+            grep -n "minSdk" android/app/build.gradle.kts
+            flutter build apk --debug
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
