@@ -25,9 +25,10 @@ class _InstituteShellState extends State<InstituteShell> {
   void _go(int index) => setState(() => _index = index);
 
   void _openNotifications(BuildContext context) {
+    final isDark = InstituteScope.of(context).isDarkMode;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1C1B1A) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -40,7 +41,6 @@ class _InstituteShellState extends State<InstituteShell> {
             Text(
               'Notifications',
               style: TextStyle(
-                color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -54,7 +54,7 @@ class _InstituteShellState extends State<InstituteShell> {
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.quiz_outlined, color: AppColors.ink),
+              leading: Icon(Icons.quiz_outlined),
               title: Text('Daily practice sets available'),
               subtitle: Text('New questions ready in the Quiz tab.'),
             ),
@@ -65,9 +65,10 @@ class _InstituteShellState extends State<InstituteShell> {
   }
 
   void _openDownloads(BuildContext context) {
+    final isDark = InstituteScope.of(context).isDarkMode;
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1C1B1A) : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -80,7 +81,6 @@ class _InstituteShellState extends State<InstituteShell> {
             Text(
               'Downloads',
               style: TextStyle(
-                color: AppColors.ink,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
               ),
@@ -88,7 +88,7 @@ class _InstituteShellState extends State<InstituteShell> {
             SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: Icon(Icons.download_done_outlined, color: AppColors.ink),
+              leading: Icon(Icons.download_done_outlined),
               title: Text('Offline notes & E-Books'),
               subtitle: Text('Saved study material from E-Book will appear here.'),
             ),
@@ -102,12 +102,18 @@ class _InstituteShellState extends State<InstituteShell> {
   Widget build(BuildContext context) {
     final store = InstituteScope.of(context);
     final exam = store.selectedExam ?? 'UPSC & MPPSC';
+    final isDark = store.isDarkMode;
+    final barBg = isDark ? const Color(0xFF141312) : AppColors.cream;
+    final cardBg = isDark ? const Color(0xFF1E1D1B) : Colors.white;
+    final borderCol = isDark ? const Color(0xFF322F2C) : AppColors.line;
+    final primaryText = isDark ? const Color(0xFFF5F2EE) : AppColors.ink;
+    final secondaryText = isDark ? const Color(0xFFB5AEA6) : AppColors.muted;
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: AppColors.cream,
+      backgroundColor: barBg,
       drawer: Drawer(
-        backgroundColor: AppColors.cream,
+        backgroundColor: barBg,
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
@@ -115,9 +121,9 @@ class _InstituteShellState extends State<InstituteShell> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardBg,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.line),
+                  border: Border.all(color: borderCol),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -130,10 +136,10 @@ class _InstituteShellState extends State<InstituteShell> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'Aagaaz Institute',
                                 style: TextStyle(
-                                  color: AppColors.ink,
+                                  color: primaryText,
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -141,8 +147,8 @@ class _InstituteShellState extends State<InstituteShell> {
                               if (store.phone != null)
                                 Text(
                                   maskIndianMobile(store.phone!),
-                                  style: const TextStyle(
-                                    color: AppColors.muted,
+                                  style: TextStyle(
+                                    color: secondaryText,
                                     fontSize: 12.5,
                                   ),
                                 ),
@@ -158,7 +164,7 @@ class _InstituteShellState extends State<InstituteShell> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.cream,
+                        color: barBg,
                         borderRadius: BorderRadius.circular(999),
                       ),
                       child: Text(
@@ -175,7 +181,7 @@ class _InstituteShellState extends State<InstituteShell> {
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.person_outline, color: AppColors.ink),
+                leading: Icon(Icons.person_outline, color: primaryText),
                 title: const Text('Profile & Account'),
                 onTap: () {
                   Navigator.pop(context);
@@ -187,15 +193,29 @@ class _InstituteShellState extends State<InstituteShell> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.swap_horiz_rounded, color: AppColors.ink),
+                leading: Icon(Icons.swap_horiz_rounded, color: primaryText),
                 title: const Text('Switch UPSC / MPPSC'),
                 onTap: () {
                   Navigator.pop(context);
                   store.selectExam(exam == 'UPSC' ? 'MPPSC' : 'UPSC');
                 },
               ),
+              SwitchListTile(
+                secondary: Icon(
+                  isDark ? Icons.dark_mode : Icons.dark_mode_outlined,
+                  color: primaryText,
+                ),
+                title: const Text('Night mode'),
+                subtitle: Text(
+                  isDark ? 'On' : 'Off',
+                  style: TextStyle(color: secondaryText, fontSize: 12),
+                ),
+                value: isDark,
+                activeThumbColor: AppColors.clay,
+                onChanged: (val) => store.toggleDarkMode(val),
+              ),
               ListTile(
-                leading: const Icon(Icons.notifications_none, color: AppColors.ink),
+                leading: Icon(Icons.notifications_none, color: primaryText),
                 title: const Text('Notifications'),
                 onTap: () {
                   Navigator.pop(context);
@@ -203,7 +223,7 @@ class _InstituteShellState extends State<InstituteShell> {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download_outlined, color: AppColors.ink),
+                leading: Icon(Icons.download_outlined, color: primaryText),
                 title: const Text('Downloads'),
                 onTap: () {
                   Navigator.pop(context);
@@ -215,20 +235,20 @@ class _InstituteShellState extends State<InstituteShell> {
         ),
       ),
       appBar: AppBar(
-        backgroundColor: AppColors.cream,
+        backgroundColor: barBg,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           tooltip: 'Menu',
-          icon: const Icon(Icons.menu, color: AppColors.ink),
+          icon: Icon(Icons.menu, color: primaryText),
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         title: Row(
           children: [
-            const Text(
+            Text(
               'Aagaaz',
               style: TextStyle(
-                color: AppColors.ink,
+                color: primaryText,
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
               ),
@@ -237,9 +257,9 @@ class _InstituteShellState extends State<InstituteShell> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardBg,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppColors.line),
+                border: Border.all(color: borderCol),
               ),
               child: Text(
                 exam,
@@ -255,12 +275,12 @@ class _InstituteShellState extends State<InstituteShell> {
         actions: [
           IconButton(
             tooltip: 'Notifications',
-            icon: const Icon(Icons.notifications_outlined, color: AppColors.ink),
+            icon: Icon(Icons.notifications_outlined, color: primaryText),
             onPressed: () => _openNotifications(context),
           ),
           IconButton(
             tooltip: 'Downloads',
-            icon: const Icon(Icons.download_outlined, color: AppColors.ink),
+            icon: Icon(Icons.download_outlined, color: primaryText),
             onPressed: () => _openDownloads(context),
           ),
           const SizedBox(width: 4),
@@ -280,6 +300,7 @@ class _InstituteShellState extends State<InstituteShell> {
         ],
       ),
       bottomNavigationBar: NavigationBar(
+        backgroundColor: barBg,
         selectedIndex: _index,
         onDestinationSelected: _go,
         destinations: const [
