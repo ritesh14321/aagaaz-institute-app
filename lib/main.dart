@@ -8,46 +8,90 @@ import 'state/institute_store.dart';
 import 'supabase_service.dart';
 import 'theme/app_theme.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-
-  String? initError;
-  try {
-    await SupabaseService.initialize();
-  } catch (e) {
-    initError = e.toString();
-  }
-
-  runApp(AagaazApp(initError: initError));
+  runApp(const AagaazApp());
 }
 
 class AagaazApp extends StatefulWidget {
-  final String? initError;
-  const AagaazApp({super.key, this.initError});
+  const AagaazApp({super.key});
 
   @override
   State<AagaazApp> createState() => _AagaazAppState();
 }
 
 class _AagaazAppState extends State<AagaazApp> {
-  final _store = InstituteStore();
+  InstituteStore? _store;
+  String? _errorText;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _boot();
+  }
+
+  Future<void> _boot() async {
+    try {
+      await SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
+      await SupabaseService.initialize();
+      if (!mounted) return;
+      setState(() {
+        _store = InstituteStore();
+        _ready = true;
+      });
+    } catch (e, st) {
+      if (!mounted) return;
+      setState(() {
+        _errorText = '$e\n\n$st';
+        _ready = true;
+      });
+    }
+  }
 
   @override
   void dispose() {
-    _store.dispose();
+    _store?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_ready) {
+      return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    if (_errorText != null) {
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(title: const Text('App Debug Log')),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(
+              _errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 13),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final store = _store!;
     return InstituteScope(
-      store: _store,
+      store: store,
       child: Builder(
         builder: (context) {
-          final store = InstituteScope.of(context);
+          final currentStore = InstituteScope.of(context);
           return MaterialApp(
             title: 'Aagaaz Institute',
             debugShowCheckedModeBanner: false,
@@ -60,20 +104,8 @@ class _AagaazAppState extends State<AagaazApp> {
                 brightness: Brightness.dark,
               ),
             ),
-            themeMode: store.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: widget.initError != null
-                ? Scaffold(
-                    body: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Text(
-                          'Startup Error:\n${widget.initError}',
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ),
-                  )
-                : const _Gate(),
+            themeMode: currentStore.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            home: const _Gate(),
           );
         },
       ),
