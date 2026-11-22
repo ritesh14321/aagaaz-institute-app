@@ -30,7 +30,13 @@ jobs:
 
       - name: Build debug APK
         run: |
-          flutter build apk --debug || true
+          SDK_PATH="${FLUTTER_ROOT:-$(dirname $(dirname $(readlink -f $(which flutter))))}"
+          ANDROID_SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}}"
+
+          cat << EOF > android/local.properties
+          sdk.dir=$ANDROID_SDK
+          flutter.sdk=$SDK_PATH
+          EOF
 
           sed -i '/android\.builtInKotlin/d; /android\.newDsl/d' android/gradle.properties 2>/dev/null || true
 
@@ -70,9 +76,8 @@ jobs:
           }
           EOF
 
-          SDK_PATH="${FLUTTER_ROOT:-$(dirname $(dirname $(which flutter)))}"
           cd android
-          ./gradlew assembleDebug -Pflutter.sdk="$SDK_PATH" --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
